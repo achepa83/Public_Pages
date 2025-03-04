@@ -97,22 +97,32 @@
     </div>
 
     <script>
+        function log(message) {
+            console.log(`[Email Verification] ${message}`)
+        }
+
         function showStatus() {
-            const params = new URLSearchParams(window.location.search)
-            const error = params.get('error')
+            const hash = window.location.hash
+            log('URL hash received: ' + hash)
+
+            const params = new URLSearchParams(hash.substring(1))
+            const token = params.get('confirmation_token')
             
             const status = document.getElementById('status')
             const message = document.getElementById('message')
 
-            if (error) {
+            if (!token) {
+                log('No token found in URL')
                 status.textContent = 'Verification Failed'
                 message.className = 'message error'
-                message.textContent = decodeURIComponent(error)
-            } else {
-                status.textContent = 'Email Verified'
-                message.className = 'message success'
-                message.textContent = 'Your email has been successfully verified.'
+                message.textContent = 'No verification token found'
+                return
             }
+
+            log('Token found: ' + token.substring(0, 8) + '...')
+            status.textContent = 'Email Verified'
+            message.className = 'message success'
+            message.textContent = 'Your email has been successfully verified.'
         }
 
         showStatus()
