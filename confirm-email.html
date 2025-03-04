@@ -123,26 +123,24 @@
 
                 log('Token found: ' + token.substring(0, 8) + '...')
 
-                // Make verification request to Supabase
-                const response = await fetch('https://aqfcgbxmqqbqwqhfpjfk.supabase.co/auth/v1/verify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        type: 'signup',
-                        token: token
-                    })
+                // Initialize Supabase client
+                const { createClient } = supabase
+                const supabaseClient = createClient(
+                    'https://aqfcgbxmqqbqwqhfpjfk.supabase.co',
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZmNnYnhtcXFicXdxaGZwamZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk5MjE5NzAsImV4cCI6MjAyNTQ5Nzk3MH0.QAXRvb8XTqsEJ8AlZGG5y7JXxw5xL_WIjbQpqHMHIaI'
+                )
+
+                log('Attempting to verify token with Supabase...')
+
+                // Verify the token
+                const { data, error } = await supabaseClient.auth.verifyOtp({
+                    token_hash: token,
+                    type: 'signup'
                 })
 
-                log('Verification response status: ' + response.status)
-                
-                const data = await response.json()
-                log('Verification response data: ' + JSON.stringify(data, null, 2))
+                log('Verification response:', { data, error })
 
-                if (!response.ok) {
-                    throw new Error(data.error?.message || 'Verification failed')
-                }
+                if (error) throw error
 
                 status.textContent = 'Email Verified'
                 message.className = 'message success'
