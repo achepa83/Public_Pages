@@ -2,6 +2,13 @@
   functions = "functions"
   publish = "."
 
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Access-Control-Allow-Origin = "https://achepa83.github.io"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
