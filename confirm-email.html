@@ -126,25 +126,17 @@
                 }
 
                 const token = hashParams.get('confirmation_token')
-                const type = hashParams.get('type')
-                const error = hashParams.get('error')
-                const error_description = hashParams.get('error_description')
-
-                if (error || error_description) {
-                    debugLog('Error found in URL parameters')
-                    throw new Error(error_description || error || 'Verification failed')
-                }
-
+                
                 if (!token) {
                     debugLog('No confirmation token found')
                     throw new Error('No confirmation token found in URL')
                 }
 
-                // Initialize Supabase client - we'll use environment variables from Supabase
+                // Initialize Supabase client with your actual project credentials
                 const { createClient } = supabase
                 const supabaseClient = createClient(
-                    'https://xyzcompany.supabase.co',  // Replace with your project URL
-                    'public-anon-key'  // Replace with your public anon key
+                    'https://aqfcgbxmqqbqwqhfpjfk.supabase.co',  // Your actual Supabase project URL
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZmNnYnhtcXFicXdxaGZwamZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk5MjE5NzAsImV4cCI6MjAyNTQ5Nzk3MH0.QAXRvb8XTqsEJ8AlZGG5y7JXxw5xL_WIjbQpqHMHIaI'  // Your actual public anon key
                 )
 
                 debugLog('Attempting to verify token with Supabase...')
