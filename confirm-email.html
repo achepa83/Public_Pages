@@ -128,8 +128,8 @@
 
                 log('Token found: ' + token.substring(0, 8) + '...')
 
-                // Redirect to Supabase's auth endpoint for verification
-                window.location.href = `https://dnnwaksqcnhdzfkieltf.supabase.co/auth/v1/callback?token=${token}&type=signup&redirect_to=${encodeURIComponent(window.location.origin + window.location.pathname)}`
+                // Use the correct Supabase project URL and endpoint
+                window.location.href = `https://dnnwaksqcnhdzfkieltf.supabase.co/auth/v1/verify?token_hash=${token}&type=signup&redirect_to=${encodeURIComponent(window.location.origin + window.location.pathname)}`
 
             } catch (error) {
                 log('Error: ' + error.message)
