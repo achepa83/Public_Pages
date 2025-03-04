@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Confirmation - MozzApp</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #4F46E5;
@@ -139,8 +140,28 @@
                     throw new Error('No confirmation token found in URL')
                 }
 
-                debugLog('Verification process completed')
-                showMessage('Email verification process completed. You can now close this window and return to the app.', 'success')
+                // Initialize Supabase client - we'll use environment variables from Supabase
+                const { createClient } = supabase
+                const supabaseClient = createClient(
+                    'https://xyzcompany.supabase.co',  // Replace with your project URL
+                    'public-anon-key'  // Replace with your public anon key
+                )
+
+                debugLog('Attempting to verify token with Supabase...')
+                
+                // Verify the token
+                const { error: verifyError } = await supabaseClient.auth.verifyOtp({
+                    token_hash: token,
+                    type: 'signup'
+                })
+
+                if (verifyError) {
+                    debugLog('Verification error from Supabase: ' + verifyError.message)
+                    throw verifyError
+                }
+
+                debugLog('Verification process completed successfully')
+                showMessage('Email verified successfully! You can now close this window and return to the app.', 'success')
 
             } catch (error) {
                 debugLog('Error occurred: ' + error.message)
