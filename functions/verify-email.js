@@ -1,16 +1,20 @@
 const { createClient } = require('@supabase/supabase-js')
 
 exports.handler = async function(event, context) {
-    // Handle CORS preflight requests
+    // Set CORS headers
+    const headers = {
+        'Access-Control-Allow-Origin': 'https://achepa83.github.io',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+    };
+
+    // Handle OPTIONS request (preflight)
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin': 'https://achepa83.github.io',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS'
-            }
-        }
+            headers: headers,
+            body: ''
+        };
     }
 
     // Only allow POST requests
@@ -43,12 +47,7 @@ exports.handler = async function(event, context) {
 
         return {
             statusCode: 200,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': 'https://achepa83.github.io',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS'
-            },
+            headers: headers,
             body: JSON.stringify({
                 message: 'Email verified successfully'
             })
@@ -57,12 +56,7 @@ exports.handler = async function(event, context) {
         console.error('Verification error:', error)
         return {
             statusCode: 400,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': 'https://achepa83.github.io',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS'
-            },
+            headers: headers,
             body: JSON.stringify({
                 message: error.message
             })
