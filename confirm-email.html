@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Confirmation - MozzApp</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #4F46E5;
@@ -106,10 +105,16 @@
             debug.textContent += message + '\n'
         }
 
-        async function verifyEmail() {
+        function showStatus(success, message) {
             const status = document.getElementById('status')
-            const message = document.getElementById('message')
+            const messageDiv = document.getElementById('message')
             
+            status.textContent = success ? 'Email Verified' : 'Verification Failed'
+            messageDiv.className = `message ${success ? 'success' : 'error'}`
+            messageDiv.textContent = message
+        }
+
+        async function handleEmailConfirmation() {
             try {
                 const hash = window.location.hash
                 log('URL hash received: ' + hash)
@@ -123,39 +128,30 @@
 
                 log('Token found: ' + token.substring(0, 8) + '...')
 
-                // Initialize Supabase client
-                const { createClient } = supabase
-                const supabaseClient = createClient(
-                    'https://aqfcgbxmqqbqwqhfpjfk.supabase.co',
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZmNnYnhtcXFicXdxaGZwamZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk5MjE5NzAsImV4cCI6MjAyNTQ5Nzk3MH0.QAXRvb8XTqsEJ8AlZGG5y7JXxw5xL_WIjbQpqHMHIaI'
-                )
-
-                log('Attempting to verify token with Supabase...')
-
-                // Verify the token
-                const { data, error } = await supabaseClient.auth.verifyOtp({
-                    token_hash: token,
-                    type: 'signup'
-                })
-
-                log('Verification response:', { data, error })
-
-                if (error) throw error
-
-                status.textContent = 'Email Verified'
-                message.className = 'message success'
-                message.textContent = 'Your email has been successfully verified.'
+                // Redirect to Supabase's auth endpoint for verification
+                window.location.href = `https://dnnwaksqcnhdzfkieltf.supabase.co/auth/v1/callback?token=${token}&type=signup&redirect_to=${encodeURIComponent(window.location.origin + window.location.pathname)}`
 
             } catch (error) {
                 log('Error: ' + error.message)
-                status.textContent = 'Verification Failed'
-                message.className = 'message error'
-                message.textContent = error.message
+                showStatus(false, error.message)
             }
         }
 
-        // Start verification when page loads
-        verifyEmail()
+        // Check if we're returning from Supabase verification
+        const urlParams = new URLSearchParams(window.location.search)
+        const error = urlParams.get('error')
+        const error_description = urlParams.get('error_description')
+
+        if (window.location.hash) {
+            // Initial load with token - start verification
+            handleEmailConfirmation()
+        } else if (error || error_description) {
+            // Returned with error
+            showStatus(false, error_description || error || 'Verification failed')
+        } else {
+            // Returned successfully
+            showStatus(true, 'Your email has been successfully verified.')
+        }
     </script>
 </body>
 </html>
