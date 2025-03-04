@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Confirmation - MozzApp</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #4F46E5;
@@ -70,6 +69,19 @@
             background-color: #FDE8E8;
             color: #9B1C1C;
         }
+
+        .debug-info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #1a1a1a;
+            color: #00ff00;
+            border-radius: 0.5rem;
+            text-align: left;
+            font-family: monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -82,45 +94,62 @@
         <h1>Email Verification</h1>
         <p>Verifying your email address...</p>
         <div id="message" class="message"></div>
+        <div id="debug" class="debug-info"></div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL'
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-        async function verifyEmail() {
+        function showMessage(text, type) {
             const message = document.getElementById('message')
-            
-            try {
-                // Get the token and type from URL
-                const params = new URLSearchParams(window.location.hash.substring(1))
-                const token = params.get('access_token')
-                const type = params.get('type')
+            message.className = `message ${type}`
+            message.textContent = text
+        }
 
-                if (type !== 'signup' && type !== 'recovery') {
-                    throw new Error('Invalid verification type')
+        function debugLog(text) {
+            console.log(text)
+            const debug = document.getElementById('debug')
+            debug.style.display = 'block'
+            debug.textContent += text + '\n'
+        }
+
+        async function handleEmailConfirmation() {
+            try {
+                debugLog('Starting email confirmation process...')
+                
+                // Get URL hash parameters
+                const hashParams = new URLSearchParams(window.location.hash.substring(1))
+                debugLog('URL Hash: ' + window.location.hash)
+
+                // Log all parameters received
+                for (const [key, value] of hashParams) {
+                    debugLog(`Parameter ${key}: ${value.substring(0, 8)}...`)
                 }
 
-                // Verify the token with Supabase
-                const { error } = await supabase.auth.verifyOtp({
-                    token_hash: token,
-                    type: type
-                })
+                const token = hashParams.get('confirmation_token')
+                const type = hashParams.get('type')
+                const error = hashParams.get('error')
+                const error_description = hashParams.get('error_description')
 
-                if (error) throw error
+                if (error || error_description) {
+                    debugLog('Error found in URL parameters')
+                    throw new Error(error_description || error || 'Verification failed')
+                }
 
-                message.className = 'message success'
-                message.textContent = 'Email verified successfully!'
-                
+                if (!token) {
+                    debugLog('No confirmation token found')
+                    throw new Error('No confirmation token found in URL')
+                }
+
+                debugLog('Verification process completed')
+                showMessage('Email verification process completed. You can now close this window and return to the app.', 'success')
+
             } catch (error) {
-                message.className = 'message error'
-                message.textContent = error.message || 'Verification failed. Please try again.'
+                debugLog('Error occurred: ' + error.message)
+                showMessage(error.message || 'Verification failed. Please try again.', 'error')
             }
         }
 
-        // Start verification when page loads
-        verifyEmail()
+        // Start the confirmation process when page loads
+        handleEmailConfirmation()
     </script>
 </body>
 </html>
