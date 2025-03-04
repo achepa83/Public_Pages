@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Confirmation - MozzApp</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #4F46E5;
@@ -101,31 +102,36 @@
             console.log(`[Email Verification] ${message}`)
         }
 
-        function showStatus() {
-            const hash = window.location.hash
-            log('URL hash received: ' + hash)
-
-            const params = new URLSearchParams(hash.substring(1))
-            const token = params.get('confirmation_token')
-            
+        async function verifyEmail() {
             const status = document.getElementById('status')
             const message = document.getElementById('message')
+            
+            try {
+                const hash = window.location.hash
+                log('URL hash received: ' + hash)
 
-            if (!token) {
-                log('No token found in URL')
+                const params = new URLSearchParams(hash.substring(1))
+                const token = params.get('confirmation_token')
+
+                if (!token) {
+                    throw new Error('No verification token found')
+                }
+
+                log('Token found: ' + token.substring(0, 8) + '...')
+
+                // Redirect to Supabase verify endpoint
+                window.location.href = `https://aqfcgbxmqqbqwqhfpjfk.supabase.co/auth/v1/verify?token=${token}&type=signup&redirect_to=${window.location.href}`
+
+            } catch (error) {
+                log('Error: ' + error.message)
                 status.textContent = 'Verification Failed'
                 message.className = 'message error'
-                message.textContent = 'No verification token found'
-                return
+                message.textContent = error.message
             }
-
-            log('Token found: ' + token.substring(0, 8) + '...')
-            status.textContent = 'Email Verified'
-            message.className = 'message success'
-            message.textContent = 'Your email has been successfully verified.'
         }
 
-        showStatus()
+        // Start verification when page loads
+        verifyEmail()
     </script>
 </body>
 </html>
