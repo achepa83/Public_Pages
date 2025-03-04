@@ -94,15 +94,13 @@
         <h1>Email Verification</h1>
         <p id="status">Verifying your email...</p>
         <div id="message" class="message"></div>
-        <div id="debug" class="debug-info"></div>
     </div>
 
     <script>
         function log(message) {
-            console.log(`[Email Verification] ${message}`)
-            const debug = document.getElementById('debug')
-            debug.style.display = 'block'
-            debug.textContent += message + '\n'
+            if (location.hostname === 'localhost') {
+                console.log(`[Email Verification] ${message}`)
+            }
         }
 
         function showStatus(success, message) {
@@ -117,7 +115,7 @@
         async function handleEmailConfirmation() {
             try {
                 const hash = window.location.hash
-                log('URL hash received: ' + hash)
+                log('Processing verification...')
 
                 const params = new URLSearchParams(hash.substring(1))
                 const token = params.get('confirmation_token')
@@ -126,27 +124,18 @@
                     throw new Error('No verification token found')
                 }
 
-                log('Token found: ' + token.substring(0, 8) + '...')
-
-                // Send verification request to Supabase
-                const response = await fetch('https://dnnwaksqcnhdzfkieltf.supabase.co/auth/v1/verify', {
+                // Call our Netlify function
+                const response = await fetch('https://flourishing-sable-c1ebde.netlify.app/', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRubndha3NxY25oZHpma2llbHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk5MjE5NzAsImV4cCI6MjAyNTQ5Nzk3MH0.sDX_GKHbP5LJW-QJj-j7_XFr5HAGHAGRYLJYb5jO8Oc'
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        type: 'signup',
-                        token: token
-                    })
+                    body: JSON.stringify({ token })
                 })
 
-                log('Response status: ' + response.status)
                 const data = await response.json()
-                log('Response data: ' + JSON.stringify(data))
-
                 if (!response.ok) {
-                    throw new Error(data.msg || data.error || 'Verification failed')
+                    throw new Error(data.message || 'Verification failed')
                 }
 
                 showStatus(true, 'Your email has been successfully verified.')
@@ -157,7 +146,6 @@
             }
         }
 
-        // Check if we have a token in the URL
         if (window.location.hash) {
             handleEmailConfirmation()
         } else {
