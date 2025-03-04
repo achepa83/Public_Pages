@@ -128,8 +128,27 @@
 
                 log('Token found: ' + token.substring(0, 8) + '...')
 
-                // Use the correct Supabase project URL and endpoint
-                window.location.href = `https://dnnwaksqcnhdzfkieltf.supabase.co/auth/v1/verify?token_hash=${token}&type=signup&redirect_to=${encodeURIComponent(window.location.origin + window.location.pathname)}`
+                // Send verification request to Supabase
+                const response = await fetch('https://dnnwaksqcnhdzfkieltf.supabase.co/auth/v1/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'signup',
+                        token_hash: token
+                    })
+                })
+
+                log('Response status: ' + response.status)
+                const data = await response.json()
+                log('Response data: ' + JSON.stringify(data))
+
+                if (!response.ok) {
+                    throw new Error(data.msg || data.error || 'Verification failed')
+                }
+
+                showStatus(true, 'Your email has been successfully verified.')
 
             } catch (error) {
                 log('Error: ' + error.message)
@@ -137,20 +156,11 @@
             }
         }
 
-        // Check if we're returning from Supabase verification
-        const urlParams = new URLSearchParams(window.location.search)
-        const error = urlParams.get('error')
-        const error_description = urlParams.get('error_description')
-
+        // Check if we have a token in the URL
         if (window.location.hash) {
-            // Initial load with token - start verification
             handleEmailConfirmation()
-        } else if (error || error_description) {
-            // Returned with error
-            showStatus(false, error_description || error || 'Verification failed')
         } else {
-            // Returned successfully
-            showStatus(true, 'Your email has been successfully verified.')
+            showStatus(false, 'No verification token found')
         }
     </script>
 </body>
