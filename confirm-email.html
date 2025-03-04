@@ -132,11 +132,12 @@
                 const response = await fetch('https://dnnwaksqcnhdzfkieltf.supabase.co/auth/v1/verify', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRubndha3NxY25oZHpma2llbHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk5MjE5NzAsImV4cCI6MjAyNTQ5Nzk3MH0.sDX_GKHbP5LJW-QJj-j7_XFr5HAGHAGRYLJYb5jO8Oc'
                     },
                     body: JSON.stringify({
                         type: 'signup',
-                        token_hash: token
+                        token: token
                     })
                 })
 
