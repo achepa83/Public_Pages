@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Confirmation - MozzApp</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #4F46E5;
@@ -93,76 +92,10 @@
             <path d="M24 16L31.0981 20V28L24 32L16.9019 28V20L24 16Z" fill="#4F46E5"/>
         </svg>
         <h1>Email Verification</h1>
-        <p>Verifying your email address...</p>
-        <div id="message" class="message"></div>
-        <div id="debug" class="debug-info"></div>
+        <p>Your email has been verified!</p>
+        <div id="message" class="message success">
+            You can now close this window and return to the app.
+        </div>
     </div>
-
-    <script>
-        function showMessage(text, type) {
-            const message = document.getElementById('message')
-            message.className = `message ${type}`
-            message.textContent = text
-        }
-
-        function debugLog(text) {
-            console.log(text)
-            const debug = document.getElementById('debug')
-            debug.style.display = 'block'
-            debug.textContent += text + '\n'
-        }
-
-        async function handleEmailConfirmation() {
-            try {
-                debugLog('Starting email confirmation process...')
-                
-                // Get URL hash parameters
-                const hashParams = new URLSearchParams(window.location.hash.substring(1))
-                debugLog('URL Hash: ' + window.location.hash)
-
-                // Log all parameters received
-                for (const [key, value] of hashParams) {
-                    debugLog(`Parameter ${key}: ${value.substring(0, 8)}...`)
-                }
-
-                const token = hashParams.get('confirmation_token')
-                
-                if (!token) {
-                    debugLog('No confirmation token found')
-                    throw new Error('No confirmation token found in URL')
-                }
-
-                // Initialize Supabase client with your actual project credentials
-                const { createClient } = supabase
-                const supabaseClient = createClient(
-                    'https://aqfcgbxmqqbqwqhfpjfk.supabase.co',  // Your actual Supabase project URL
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZmNnYnhtcXFicXdxaGZwamZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk5MjE5NzAsImV4cCI6MjAyNTQ5Nzk3MH0.QAXRvb8XTqsEJ8AlZGG5y7JXxw5xL_WIjbQpqHMHIaI'  // Your actual public anon key
-                )
-
-                debugLog('Attempting to verify token with Supabase...')
-                
-                // Verify the token
-                const { error: verifyError } = await supabaseClient.auth.verifyOtp({
-                    token_hash: token,
-                    type: 'signup'
-                })
-
-                if (verifyError) {
-                    debugLog('Verification error from Supabase: ' + verifyError.message)
-                    throw verifyError
-                }
-
-                debugLog('Verification process completed successfully')
-                showMessage('Email verified successfully! You can now close this window and return to the app.', 'success')
-
-            } catch (error) {
-                debugLog('Error occurred: ' + error.message)
-                showMessage(error.message || 'Verification failed. Please try again.', 'error')
-            }
-        }
-
-        // Start the confirmation process when page loads
-        handleEmailConfirmation()
-    </script>
 </body>
 </html>
