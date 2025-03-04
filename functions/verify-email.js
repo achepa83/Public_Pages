@@ -1,9 +1,27 @@
 const { createClient } = require('@supabase/supabase-js')
 
 exports.handler = async function(event, context) {
+    // Handle CORS preflight requests
+    if (event.httpMethod === 'OPTIONS') {
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': 'https://achepa83.github.io',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
+            }
+        }
+    }
+
     // Only allow POST requests
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' }
+        return { 
+            statusCode: 405, 
+            headers: {
+                'Access-Control-Allow-Origin': 'https://achepa83.github.io'
+            },
+            body: 'Method Not Allowed' 
+        }
     }
 
     try {
@@ -27,19 +45,23 @@ exports.handler = async function(event, context) {
             statusCode: 200,
             headers: {
                 'Content-Type': 'application/json',
-                // Allow requests from your GitHub Pages domain
-                'Access-Control-Allow-Origin': 'https://achepa83.github.io'
+                'Access-Control-Allow-Origin': 'https://achepa83.github.io',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
             body: JSON.stringify({
                 message: 'Email verified successfully'
             })
         }
     } catch (error) {
+        console.error('Verification error:', error)
         return {
             statusCode: 400,
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': 'https://achepa83.github.io'
+                'Access-Control-Allow-Origin': 'https://achepa83.github.io',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
             body: JSON.stringify({
                 message: error.message
