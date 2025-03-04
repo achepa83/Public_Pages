@@ -92,10 +92,68 @@
             <path d="M24 16L31.0981 20V28L24 32L16.9019 28V20L24 16Z" fill="#4F46E5"/>
         </svg>
         <h1>Email Verification</h1>
-        <p>Your email has been verified!</p>
-        <div id="message" class="message success">
-            You can now close this window and return to the app.
-        </div>
+        <p id="status">Verifying your email...</p>
+        <div id="message" class="message"></div>
     </div>
+
+    <script>
+        // Debug logging
+        function log(message) {
+            console.log(`[Email Verification] ${message}`)
+        }
+
+        async function handleEmailConfirmation() {
+            const status = document.getElementById('status')
+            const message = document.getElementById('message')
+            
+            try {
+                // Get token from URL
+                const hash = window.location.hash
+                log('URL hash: ' + hash)
+                
+                const params = new URLSearchParams(hash.substring(1))
+                const token = params.get('confirmation_token')
+                
+                if (!token) {
+                    throw new Error('No confirmation token found in URL')
+                }
+                
+                log('Token found: ' + token.substring(0, 8) + '...')
+
+                // Instead of verifying directly, redirect to Supabase's auth endpoint
+                const response = await fetch('https://aqfcgbxmqqbqwqhfpjfk.supabase.co/auth/v1/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'signup',
+                        token: token
+                    })
+                })
+
+                log('Verification response status: ' + response.status)
+
+                if (!response.ok) {
+                    const error = await response.json()
+                    throw new Error(error.message || 'Verification failed')
+                }
+
+                status.textContent = 'Your email has been verified!'
+                message.className = 'message success'
+                message.textContent = 'You can now close this window and return to the app.'
+                log('Verification successful')
+
+            } catch (error) {
+                log('Error: ' + error.message)
+                status.textContent = 'Verification failed'
+                message.className = 'message error'
+                message.textContent = error.message
+            }
+        }
+
+        // Start verification when page loads
+        handleEmailConfirmation()
+    </script>
 </body>
 </html>
